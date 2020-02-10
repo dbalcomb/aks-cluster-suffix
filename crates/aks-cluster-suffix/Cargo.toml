@@ -6,3 +6,6 @@ description = "A tool for generating the Azure Kubernetes Service (AKS) cluster 
 repository = "https://github.com/dbalcomb/aks-cluster-suffix"
 license = "MIT OR Apache-2.0"
 edition = "2018"
+
+[dependencies]
+fnv = "1.0"
