@@ -20,9 +20,6 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-    - uses: actions-rs/cargo@v1
-      with:
-        command: generate-lockfile
     - uses: actions/cache@v1
       with:
         path: ~/.cargo/registry
