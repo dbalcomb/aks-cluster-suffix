@@ -2,9 +2,7 @@ use std::hash::Hasher;
 
 use fnv::FnvHasher;
 
-use self::lookup::LOOKUP;
-
-mod lookup;
+use crate::lookup::LOOKUP;
 
 fn fnv1a(bytes: &[u8]) -> u64 {
     let mut hasher = FnvHasher::default();
