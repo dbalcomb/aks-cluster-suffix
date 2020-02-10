@@ -1,0 +1,50 @@
+name: build
+on:
+  pull_request:
+    paths:
+    - '**.rs'
+    - '**/Cargo.toml'
+    - '**/Cargo.lock'
+    - .github/workflows/build.yml
+  push:
+    branches:
+    - master
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - uses: actions-rs/cargo@v1
+      with:
+        command: generate-lockfile
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-git-
+    - uses: actions/cache@v1
+      with:
+        path: target/release
+        key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-target-release-
+    - uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --workspace --release
+    - run: |
+        cargo install cargo-cache --no-default-features --features ci-autoclean
+        cargo-cache

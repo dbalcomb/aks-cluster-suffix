@@ -1,0 +1,40 @@
+name: lint
+on:
+  pull_request:
+    paths:
+    - '**.rs'
+    - clippy.toml
+    - rustfmt.toml
+    - .github/workflows/lint.yml
+jobs:
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        components: rustfmt
+    - uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        components: clippy
+    - uses: actions-rs/clippy-check@v1
+      with:
+        args: --all -- -D warnings
+        token: ${{ secrets.GITHUB_TOKEN }}

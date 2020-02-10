@@ -1,0 +1,8 @@
+[package]
+name = "aks-cluster-suffix"
+version = "0.1.0"
+authors = ["Daniel Balcomb <daniel.balcomb@gmail.com>"]
+description = "A tool for generating the Azure Kubernetes Service (AKS) cluster suffix."
+repository = "https://github.com/dbalcomb/aks-cluster-suffix"
+license = "MIT OR Apache-2.0"
+edition = "2018"
