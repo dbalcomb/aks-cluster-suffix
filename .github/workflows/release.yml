@@ -1,0 +1,82 @@
+name: release
+on:
+  push:
+    tags:
+    - '*.*.*'
+jobs:
+  build:
+    name: build / ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target:
+        - x86_64-unknown-linux-gnu
+        - x86_64-unknown-linux-musl
+        - x86_64-apple-darwin
+        - x86_64-pc-windows-msvc
+        include:
+        - target: x86_64-unknown-linux-gnu
+          os: ubuntu-latest
+        - target: x86_64-unknown-linux-musl
+          os: ubuntu-latest
+        - target: x86_64-apple-darwin
+          os: macos-latest
+        - target: x86_64-pc-windows-msvc
+          os: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        target: ${{ matrix.target }}
+        toolchain: stable
+        override: true
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-git-
+    - uses: actions/cache@v1
+      with:
+        path: target/release
+        key: ${{ matrix.target }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ matrix.target }}-target-release-
+    - uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --workspace --release --target ${{ matrix.target }}
+    - run: |
+        cargo install cargo-cache --no-default-features --features ci-autoclean
+        cargo-cache
+    - if: matrix.os != 'windows-latest'
+      id: tag_version
+      run: echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/tags/}
+    - if: matrix.os != 'windows-latest'
+      run: tar -czvf aks-cluster-suffix-${{ steps.tag_version.outputs.TAG_VERSION }}-${{ matrix.target }}.tar.gz -C ./target/${{ matrix.target }}/release aks-cluster-suffix
+    - if: matrix.os != 'windows-latest'
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        tag: ${{ github.ref }}
+        file: aks-cluster-suffix-${{ steps.tag_version.outputs.TAG_VERSION }}-${{ matrix.target }}.tar.gz
+        asset_name: aks-cluster-suffix-${{ steps.tag_version.outputs.TAG_VERSION }}-${{ matrix.target }}.tar.gz
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+    - if: matrix.os == 'windows-latest'
+      id: tag_version_win
+      run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
+      shell: bash
+    - if: matrix.os == 'windows-latest'
+      run: compress-archive ./target/${{ matrix.target }}/release/aks-cluster-suffix.exe aks-cluster-suffix-${{ steps.tag_version_win.outputs.TAG_VERSION }}-${{ matrix.target }}.zip
+    - if: matrix.os == 'windows-latest'
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        tag: ${{ github.ref }}
+        file: aks-cluster-suffix-${{ steps.tag_version_win.outputs.TAG_VERSION }}-${{ matrix.target }}.zip
+        asset_name: aks-cluster-suffix-${{ steps.tag_version_win.outputs.TAG_VERSION }}-${{ matrix.target }}.zip
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
