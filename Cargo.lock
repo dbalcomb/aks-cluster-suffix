@@ -4,8 +4,15 @@
 name = "aks-cluster-suffix"
 version = "0.1.0"
 dependencies = [
- "assert_cmd",
  "fnv",
+]
+
+[[package]]
+name = "aks-cluster-suffix-bin"
+version = "0.1.0"
+dependencies = [
+ "aks-cluster-suffix",
+ "assert_cmd",
  "serde",
  "serde_json",
 ]

@@ -1,4 +1,5 @@
 [workspace]
 members = [
   "crates/aks-cluster-suffix",
+  "crates/aks-cluster-suffix-bin",
 ]

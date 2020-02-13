@@ -4,6 +4,8 @@ use fnv::FnvHasher;
 
 use crate::lookup::LOOKUP;
 
+mod lookup;
+
 fn fnv1a(bytes: &[u8]) -> u64 {
     let mut hasher = FnvHasher::default();
     hasher.write(bytes);

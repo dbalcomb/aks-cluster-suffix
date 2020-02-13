@@ -1,11 +1,7 @@
 use std::io::{self, Read, Write};
 
+use aks_cluster_suffix::suffix;
 use serde::{Deserialize, Serialize};
-
-use self::suffix::suffix;
-
-mod lookup;
-mod suffix;
 
 #[derive(Deserialize)]
 struct Input {
